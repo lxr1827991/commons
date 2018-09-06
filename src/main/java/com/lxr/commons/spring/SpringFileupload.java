@@ -13,6 +13,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Null;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,9 +42,9 @@ public class SpringFileupload {
 	 * @throws IllegalStateException
 	 * @throws IOException
 	 */
-	public static String upload(MultipartFile  file) throws IllegalStateException, IOException {
+	public static String upload(MultipartFile  file,String rootPath) throws IllegalStateException, IOException {
 		 
-		return upload(file, defResolve);
+		return upload(file, defResolve,rootPath);
 
 	}
 	
@@ -55,8 +56,9 @@ public class SpringFileupload {
 	 * @throws IllegalStateException
 	 * @throws IOException
 	 */
-	public static String upload(MultipartFile  file,FileUploadResolve resolve) throws IllegalStateException, IOException {
+	public static String upload(MultipartFile  file,FileUploadResolve resolve,String rootPath) throws IllegalStateException, IOException {
 		 if (file.isEmpty()) return null;
+		 if(StringUtils.isEmpty(rootPath))rootPath = "";
 	           
 		 String msg = resolve.unUpload(file.getOriginalFilename(), file.getSize());
 		 
@@ -71,23 +73,7 @@ public class SpringFileupload {
 	   // 转存文件到指定的路径
           file.transferTo(new File(upPath[0]));
 	      
-		return upPath[1];
-
-	}
-	/**
-	 * 文件上传
-	 * @param request
-	 * @param name
-	 * @return
-	 * @throws IllegalStateException
-	 * @throws IOException
-	 */
-	public static String upload(MultipartHttpServletRequest request,String name) throws IllegalStateException, IOException {
-		MultipartHttpServletRequest multipartRequest =  request;         
-		// 获得文件：
-		MultipartFile mfile = (MultipartFile) multipartRequest.getFile(name); 
-	    
-		return upload(mfile);
+		return rootPath+upPath[1];
 
 	}
 	
@@ -98,7 +84,7 @@ public class SpringFileupload {
 	 * @param name
 	 * @return
 	 */
-	public static String upload(HttpServletRequest  request,String name) {
+	public static String upload(HttpServletRequest request,String name,String rootPath) {
 		 CommonsMultipartResolver commonsMultipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());  
 	       
 		  String path = null;
@@ -106,8 +92,11 @@ public class SpringFileupload {
 	        if (!commonsMultipartResolver.isMultipart(request))throw new MultipartException("Could not parse multipart servlet request");
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;         
 		
-	try {
-			return upload(multipartRequest, name);
+	try {         
+		// 获得文件：
+		MultipartFile mfile = (MultipartFile) multipartRequest.getFile(name); 
+	    
+		return upload(mfile,rootPath);
 		}  catch (Exception e1) {
 			throw new ApplicationException(e1);
 		}
@@ -138,24 +127,7 @@ public class SpringFileupload {
 
 	}
 	
-	/**
-	 * 同名文件上传
-	 * @param request
-	 * @param name
-	 * @return
-	 * @throws IllegalStateException
-	 * @throws IOException
-	 */
-	public static String[] uploadFiles(MultipartHttpServletRequest request,String name) throws IllegalStateException, IOException {
-		MultipartHttpServletRequest multipartRequest =  request;         
-		// 获得文件：
-		List<MultipartFile> mfile =  multipartRequest.getFiles(name); 
-	    String[] files = new String[mfile.size()];
-	    for (int i = 0; i < files.length; i++) {
-	    	files[i] = upload(mfile.get(i));
-		}
-	    return files;
-	}
+	
 	
 	/**
 	 * 同名文件上传
@@ -163,7 +135,7 @@ public class SpringFileupload {
 	 * @param name
 	 * @return
 	 */
-	public static String[] uploadFiles(HttpServletRequest request,String name) {
+	public static String[] uploadFiles(HttpServletRequest request,String name,String rootPath) {
 		 CommonsMultipartResolver commonsMultipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());  
 	       
 		  String path = null;
@@ -172,14 +144,22 @@ public class SpringFileupload {
 	        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;         
 		
 	try {
-			return uploadFiles(multipartRequest, name);
+		// 获得文件：
+		List<MultipartFile> mfile =  multipartRequest.getFiles(name); 
+	    String[] files = new String[mfile.size()];
+	    for (int i = 0; i < files.length; i++) {
+	    	files[i] = upload(mfile.get(i),rootPath);
+		}
+	    return files;
 		}  catch (Exception e1) {
 			throw new ApplicationException(e1);
 		}
 	}
 	
 	
-	public static String[] uploadStandardFiles(HttpServletRequest request,String name) {
+	public static String[] uploadStandardFiles(HttpServletRequest request,String name,String rootPath) {
+		
+		if(StringUtils.isEmpty(rootPath))rootPath = "";
 		
 		CommonsMultipartResolver commonsMultipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());  
 	       
@@ -195,7 +175,7 @@ public class SpringFileupload {
 		
 		 String[] files = new String[mNames.size()];
 		    for (int i = 0; i < mNames.size(); i++) {
-		    	files[i] = upload(request,mNames.get(i));
+		    	files[i] =  upload(request,mNames.get(i),rootPath);
 			}
 		return files;
 		

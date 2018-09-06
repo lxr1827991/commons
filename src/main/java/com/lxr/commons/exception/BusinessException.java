@@ -3,7 +3,7 @@ package com.lxr.commons.exception;
 public class BusinessException extends RuntimeException{
 
 	
-	int code;
+	int code = 0;
 	
 	public BusinessException() {
 		super();
@@ -33,6 +33,14 @@ public class BusinessException extends RuntimeException{
 	public BusinessException(int code,String message) {
 		
 		super(message);
+		this.code = code;
+	}
+
+	public int getCode() {
+		return code;
+	}
+
+	public void setCode(int code) {
 		this.code = code;
 	}
 	

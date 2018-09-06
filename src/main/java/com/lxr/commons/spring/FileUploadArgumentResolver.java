@@ -33,11 +33,11 @@ public class FileUploadArgumentResolver implements HandlerMethodArgumentResolver
 			 AutoUpload autoUpload = parameter.getParameterAnnotation(AutoUpload.class);
 			 //是否标准上传
 			 if(autoUpload.standard()) {
-				 return SpringFileupload.uploadStandardFiles(request, parameter.getParameterName());
+				 return SpringFileupload.uploadStandardFiles(request, parameter.getParameterName(),autoUpload.rootPath());
 			 }else {
 				 if(!SpringFileupload.isFile(request, parameter.getParameterName()))return null;
 				 
-				 return SpringFileupload.uploadFiles(request, parameter.getParameterName());
+				 return SpringFileupload.uploadFiles(request, parameter.getParameterName(),autoUpload.rootPath());
 				 
 			 }
 			 
@@ -47,10 +47,11 @@ public class FileUploadArgumentResolver implements HandlerMethodArgumentResolver
 		 //单文件上传
 		 if(parameter.getParameterType().equals(String.class)) {
 			 HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+			 AutoUpload autoUpload = parameter.getParameterAnnotation(AutoUpload.class);
 			 
 			 if(!SpringFileupload.isFile(request, parameter.getParameterName()))return null;
 			 
-			 return SpringFileupload.upload(request, parameter.getParameterName());
+			 return SpringFileupload.upload(request, parameter.getParameterName(),autoUpload.rootPath());
 			 
 		 }
 		 

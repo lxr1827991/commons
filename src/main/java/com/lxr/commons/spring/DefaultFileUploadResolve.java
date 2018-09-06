@@ -44,7 +44,7 @@ public class DefaultFileUploadResolve implements FileUploadResolve{
 
 	
 	public static String genFileName(String fileName){
-		String trueFileName=String.valueOf(System.currentTimeMillis())+fileName;
+		String trueFileName=String.valueOf(System.currentTimeMillis())+((int)(1+Math.random()*1000000))+fileName;
 		
 		return trueFileName;
 	}
@@ -67,4 +67,8 @@ public class DefaultFileUploadResolve implements FileUploadResolve{
 		return SortUtils.asciiSort(list);
 	}
 
+	public static void main(String[] args) {
+		System.out.println();
+	}
+	
 }
