@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
@@ -181,6 +182,43 @@ public class SpringFileupload {
 		
 		
 	}
+	
+	public static String[] uploadStandardFilesOnUpdate(HttpServletRequest request,String name,String rootPath) {
+		
+		if(StringUtils.isEmpty(rootPath))rootPath = "";
+		List<String> fnames = null;
+		CommonsMultipartResolver commonsMultipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());  
+		if (commonsMultipartResolver.isMultipart(request)){
+			fnames = copyIterator(((MultipartHttpServletRequest)request).getFileNames());
+	        }
+		
+		List<String> names = enumeration2List(request.getParameterNames());
+		
+		if(fnames!=null)names.addAll(fnames);
+		List<String> mNames = defResolve.resolveFileNames(name, names);
+		
+		if(mNames==null) return new String[0] ;
+		
+		 String[] files = new String[mNames.size()];
+		    for (int i = 0; i < mNames.size(); i++) {
+		    	if(isFile(request, mNames.get(i)))
+		    	files[i] =  upload(request,mNames.get(i),rootPath);
+		    	else files[i] = request.getParameter(mNames.get(i));
+			}
+		return files;
+		
+		
+	}
+	
+	private static <T> List<T> enumeration2List(Enumeration<T> en) {
+		 List<T> copy = new ArrayList<T>();
+		while (en.hasMoreElements()) {
+			T object = (T) en.nextElement();
+			copy.add(object);
+		}
+		return copy;
+	}
+	
 	
 	public static <T> List<T> copyIterator(Iterator<T> iter) {
 	    List<T> copy = new ArrayList<T>();
